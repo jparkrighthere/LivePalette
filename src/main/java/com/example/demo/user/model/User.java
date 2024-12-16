@@ -1,4 +1,4 @@
-package com.example.demo.model.user;
+package com.example.demo.user.model;
 
 import com.example.demo.user.Role;
 import lombok.Data;

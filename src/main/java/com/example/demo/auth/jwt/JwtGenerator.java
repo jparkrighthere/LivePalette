@@ -1,6 +1,6 @@
-package com.example.demo.jwt;
+package com.example.demo.auth.jwt;
 
-import com.example.demo.model.user.User;
+import com.example.demo.user.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;

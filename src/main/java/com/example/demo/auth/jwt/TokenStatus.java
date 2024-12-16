@@ -1,4 +1,4 @@
-package com.example.demo.jwt;
+package com.example.demo.auth.jwt;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.demo.jwt;
+package com.example.demo.auth.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -35,9 +35,9 @@ public class JwtUtils {
             throw new JwtException(e.getMessage());
         }
     }
-    public String resolveTokenFromCookie(Cookie[] cookies, JwtRule tokenPrefix) {
+    public String resolveTokenFromCookie(Cookie[] cookies, String tokenPrefix) {
         return Arrays.stream(cookies)
-                .filter(cookie -> cookie.getName().equals(tokenPrefix.getValue()))
+                .filter(cookie -> cookie.getName().equals(tokenPrefix))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse("");
@@ -46,8 +46,8 @@ public class JwtUtils {
         String encodedKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
         return Keys.hmacShaKeyFor(encodedKey.getBytes(StandardCharsets.UTF_8));
     }
-    public Cookie resetCookie(JwtRule tokenPrefix) {
-        Cookie cookie = new Cookie(tokenPrefix.getValue(), null);
+    public Cookie resetCookie(String tokenPrefix) {
+        Cookie cookie = new Cookie(tokenPrefix, null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         return cookie;

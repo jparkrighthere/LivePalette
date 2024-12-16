@@ -1,6 +1,5 @@
-package com.example.demo.user;
+package com.example.demo.user.model;
 
-import com.example.demo.model.user.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
