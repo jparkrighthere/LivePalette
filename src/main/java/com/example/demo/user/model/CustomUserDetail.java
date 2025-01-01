@@ -1,35 +1,34 @@
 package com.example.demo.user.model;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 @Getter
+@RequiredArgsConstructor
 public class CustomUserDetail implements UserDetails{
 
-    private User user;
-    private Collection<? extends GrantedAuthority> authorities;
-
-    public CustomUserDetail(User user) {
-        this.user = user;
-        this.authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getValue()));
-    }
+    private final User user;
     /*
     *  UserDetails method implements
     * */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole().getValue()));
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return user.getPassword();
     }
 
     @Override

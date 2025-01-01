@@ -12,8 +12,13 @@ public final class AuthConstants {
     }
     //허용된 URI목록
     public static final String[] PERMITTED_URI = {
-            "/api/auth/login",
-            "/api/auth/register",
+            "/login",
+            "/signup",
+            "/reissue",
+    };
+    //admin user만 접근 가능한 URI
+    public static final String[] ADMIN_URI = {
+            "/admin/**",
     };
     //허용된 role
     public static final String[] PERMITTED_ROLES = {
@@ -21,9 +26,9 @@ public final class AuthConstants {
             "ADMIN",
     };
 
-    public static final String JWT_ISSUE_HEADER = "Set-Cookie";
+    public static final String JWT_ISSUE_HEADER = "Authorization";
     public static final String JWT_RESOLVE_HEADER = "Cookie";
-    public static final String ACCESS_PREFIX = "access";
+    public static final String ACCESS_PREFIX = "Bearer ";
     public static final String REFRESH_PREFIX = "refresh";
 
     public static final List<String> PERMITTED_URI_LIST = List.of(PERMITTED_URI);
