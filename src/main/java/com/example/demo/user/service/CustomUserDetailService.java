@@ -13,36 +13,45 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailService implements UserDetailsService {
-    //private final UserRepository userRepository;
+public class CustomUserDetailService implements UserDetailsService,UserService {
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         //CustomUserDetails 객체를 생성하여 넘겨줘야한다.
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("1234"));
-        user.setRole(Role.ADMIN);
-        user.setName("admin");
-        if(email.equals("admin")){
-            log.info("User is admin");
-            return new CustomUserDetail(user);}
-        user = findByEmail(email);
+        User user = findByEmail(email);
 
         if (user == null)
             return null;
         return new CustomUserDetail(user);//UserDetail instance 에 넘겨주면 AuthenicationManager가 검증한다.
     }
 
-    //UserRepository method//
-    public User findByEmail(String email){
-        return null;
+    //UserService method//
+    @Override
+    public User save(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return user;
     }
 
-    public void save(User user){
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findById(email).orElse(null);
+    }
+
+    @Override
+    public void deleteByEmail(String email) {
+        userRepository.deleteById(email);
     }
 }
