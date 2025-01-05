@@ -4,23 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
-    <script>
-        fetch('/api/persons')
-            .then(response => response.json()) 
-            .then(data => {
-                let personsList = document.getElementById('personsList');
-                data.forEach(person => {
-                    let li = document.createElement('li');
-                    li.textContent = 'Nickname: ' + person.nickname + ', Email: ' + person.email;
-                    personsList.appendChild(li);
-                });
-            })
-            .catch(error => console.error('Error:', error));
-    </script>
 </head>
 <body>
     <h1>안녕하세요</h1>
-    <ul id="personsList">
-    </ul>
 </body>
 </html>

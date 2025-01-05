@@ -10,6 +10,7 @@ import com.example.demo.user.Role;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
 import com.example.demo.user.service.CustomUserDetailService;
+import com.example.demo.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +31,7 @@ import java.util.Iterator;
 @RequiredArgsConstructor
 @RestController
 public class AuthController {
-    private final CustomUserDetailService userService;
+    private final UserService userService;
     private final JWTUtil jwtUtil;
 
     @GetMapping("/admin/test")
@@ -43,7 +44,7 @@ public class AuthController {
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority grantedAuthority = iterator.next();
         String role = grantedAuthority.getAuthority();
-        return ResponseEntity.status(200).body("admin/test success : " +userDetail.getUser().getName()+"["+role+"]");
+        return ResponseEntity.status(200).body("admin/test success : " +userDetail.getUser().getUsername()+"["+role+"]");
     }
     @GetMapping("/test")
     public ResponseEntity<?> publicTest(HttpServletResponse response) {
@@ -60,8 +61,8 @@ public class AuthController {
 
             User user = new User();
             user.setEmail(userSignupRequest.getEmail());
-            user.setPassword(userSignupRequest.getPassword());//비밀번호는 해싱이 필요하다.
-            user.setName(userSignupRequest.getUsername());
+            user.setPassword(userSignupRequest.getPassword());
+            user.setUsername(userSignupRequest.getUsername());
             user.setRole(Role.USER);//회원가입으로는 항상 user 롤을 부여하도록 한다.
 
             userService.save(user);
@@ -71,17 +72,7 @@ public class AuthController {
             return ResponseEntity.status(500).body("Internal Server Error");
         }
     }
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request,HttpServletResponse response) {
-        try{
-            //쿠키에서 토큰을 제거
-            /*jwtService.resetTokenToCookies(response);*/
-            return ResponseEntity.status(200).body("Logout successful");
-        } catch (Exception e) {
-            log.error("logout error: {}",e.getMessage());
-            return ResponseEntity.status(500).body("Internal Server Error");
-        }
-    }
+
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request,HttpServletResponse response) {
         String reissueToken = null;
@@ -103,7 +94,7 @@ public class AuthController {
 
         User user = new User();
         user.setEmail(email);
-        user.setName(username);
+        user.setUsername(username);
         user.setRole(Role.valueOf(role));
 
         String accessToken = jwtUtil.generateAccessToken(user);
