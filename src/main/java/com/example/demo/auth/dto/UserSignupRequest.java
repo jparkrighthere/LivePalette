@@ -7,4 +7,6 @@ public class UserSignupRequest {
     private String username;
     private String password;
     private String email;
+    private Long career;
+    private String field;
 }
