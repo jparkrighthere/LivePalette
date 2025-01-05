@@ -34,7 +34,7 @@ public class UserController {
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String tokenEmail = customUserDetail.getUsername();
         if (!decodedEmail.equals(tokenEmail)) {
-            return ResponseEntity.status(401).body("Forbidden");
+            return ResponseEntity.status(403).body("Forbidden");
         }
         UserDetails userDetails = customUserDetailService.loadUserByUsername(decodedEmail);
         User user = ((CustomUserDetail) userDetails).getUser();
@@ -52,7 +52,7 @@ public class UserController {
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String tokenEmail = customUserDetail.getUsername();
         if (!decodedEmail.equals(tokenEmail)) {
-            return ResponseEntity.status(401).body("Forbidden");
+            return ResponseEntity.status(403).body("Forbidden");
         }
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(decodedEmail);

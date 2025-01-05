@@ -4,7 +4,6 @@ import com.example.demo.auth.constants.AuthConstants;
 import com.example.demo.auth.jwt.JWTUtil;
 import com.example.demo.user.model.CustomUserDetail;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

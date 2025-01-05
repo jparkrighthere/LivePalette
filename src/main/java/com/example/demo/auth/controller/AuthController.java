@@ -1,15 +1,12 @@
 package com.example.demo.auth.controller;
 
 import com.example.demo.auth.constants.AuthConstants;
-import com.example.demo.auth.dto.LoginResponse;
-import com.example.demo.auth.dto.UserLoginRequest;
 import com.example.demo.auth.dto.UserSignupRequest;
 import com.example.demo.auth.jwt.JWTUtil;
 import com.example.demo.auth.jwt.TokenStatus;
 import com.example.demo.user.Role;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
-import com.example.demo.user.service.CustomUserDetailService;
 import com.example.demo.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;

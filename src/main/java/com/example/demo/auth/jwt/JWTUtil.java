@@ -2,7 +2,6 @@ package com.example.demo.auth.jwt;
 
 import com.example.demo.auth.model.RefreshToken;
 import com.example.demo.auth.repository.RefreshRepository;
-import com.example.demo.user.Role;
 import com.example.demo.user.model.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -12,7 +11,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
