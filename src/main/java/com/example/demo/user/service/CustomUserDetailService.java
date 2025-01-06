@@ -1,6 +1,6 @@
 package com.example.demo.user.service;
 
-import com.example.demo.user.Role;
+import com.example.demo.user.dto.UserUpdateProfileRequest;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
 import com.example.demo.user.repository.UserRepository;
@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,5 +52,16 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
     @Override
     public void deleteByEmail(String email) {
         userRepository.deleteById(email);
+    }
+
+    public User updateProfile(User user, UserUpdateProfileRequest updateUserRequest) {
+        // 업데이트할 필드들 처리
+        updateUserRequest.getUsername().ifPresent(user::setUsername);
+        updateUserRequest.getProfile().ifPresent(user::setProfile);
+        updateUserRequest.getField().ifPresent(user::setField);
+        updateUserRequest.getCareer().ifPresent(user::setCareer);
+
+        userRepository.save(user);
+        return user;
     }
 }
