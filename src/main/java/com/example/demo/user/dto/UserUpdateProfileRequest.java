@@ -4,7 +4,7 @@ import lombok.Data;
 import java.util.Optional;
 
 @Data
-public class UpdateUserRequest {
+public class UserUpdateProfileRequest {
     private Optional<String> username = Optional.empty();
     private Optional<String> profile = Optional.empty();
     private Optional<String> field = Optional.empty();

@@ -11,7 +11,8 @@ import com.example.demo.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
-import com.example.demo.user.dto.UpdateUserRequest;
+import com.example.demo.user.dto.UserGetProfileResponse;
+import com.example.demo.user.dto.UserUpdateProfileRequest;
 import com.example.demo.user.model.User;
 
 import java.util.Base64;
@@ -28,7 +29,7 @@ public class UserController {
     private final CustomUserDetailService customUserDetailService;
 
     @PatchMapping("/profile/{base64Email}")
-    public ResponseEntity<?> updateProfile(@PathVariable String base64Email, @RequestBody UpdateUserRequest updateUserRequest) {
+    public ResponseEntity<?> updateProfile(@PathVariable String base64Email, @RequestBody UserUpdateProfileRequest updateUserRequest) {
         // Base64로 인코딩된 이메일 디코딩
         String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -42,7 +43,7 @@ public class UserController {
         // 프로필 업데이트
         user = userService.updateProfile(user, updateUserRequest);
 
-        return ResponseEntity.status(200).body(user);
+        return ResponseEntity.status(200).body("Profile updated successfully");
     }
 
     @GetMapping("/profile/{base64Email}")
@@ -57,7 +58,13 @@ public class UserController {
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(decodedEmail);
         User user = ((CustomUserDetail) userDetails).getUser();
+        UserGetProfileResponse userGetProfileResponse = new UserGetProfileResponse();
+        userGetProfileResponse.setUsername(user.getUsername());
+        userGetProfileResponse.setEmail(user.getEmail());
+        userGetProfileResponse.setProfile(user.getProfile());
+        userGetProfileResponse.setField(user.getField());
+        userGetProfileResponse.setCareer(user.getCareer());
 
-        return ResponseEntity.status(200).body(user);
+        return ResponseEntity.status(200).body(userGetProfileResponse);
     }
 }

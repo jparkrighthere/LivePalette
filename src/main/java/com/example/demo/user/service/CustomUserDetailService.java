@@ -1,6 +1,6 @@
 package com.example.demo.user.service;
 
-import com.example.demo.user.dto.UpdateUserRequest;
+import com.example.demo.user.dto.UserUpdateProfileRequest;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
 import com.example.demo.user.repository.UserRepository;
@@ -54,7 +54,7 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
         userRepository.deleteById(email);
     }
 
-    public User updateProfile(User user, UpdateUserRequest updateUserRequest) {
+    public User updateProfile(User user, UserUpdateProfileRequest updateUserRequest) {
         // 업데이트할 필드들 처리
         updateUserRequest.getUsername().ifPresent(user::setUsername);
         updateUserRequest.getProfile().ifPresent(user::setProfile);
