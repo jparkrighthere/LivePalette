@@ -12,7 +12,7 @@ public class LoginResponse {
     private final Long career;
 
     public LoginResponse(User user) {
-        this.username = user.getName();
+        this.username = user.getUsername();
         this.email = user.getEmail();
         this.field = user.getField();
         this.career = user.getCareer();

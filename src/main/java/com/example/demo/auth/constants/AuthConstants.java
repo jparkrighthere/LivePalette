@@ -9,7 +9,7 @@ public final class AuthConstants {
     }
     //허용된 URI목록
     public static final String[] PERMITTED_URI = {
-            "/login",
+            "/signin",
             "/signup",
             "/reissue",
     };
