@@ -5,8 +5,12 @@ import com.example.demo.auth.filter.CustomLogoutFilter;
 import com.example.demo.auth.filter.JWTFilter;
 import com.example.demo.auth.filter.LoginFilter;
 import com.example.demo.auth.jwt.JWTUtil;
+import com.example.demo.auth.model.RefreshToken;
+import com.example.demo.auth.repository.RefreshRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -33,6 +37,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +53,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil), LogoutFilter.class)
                 .addFilterBefore(new JWTFilter(jwtUtil),LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper()), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -56,5 +61,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // 비밀번호 암호화를 위해 BCrypt 사용
     }
+    @Bean
+    public ObjectMapper objectMapper() {return new ObjectMapper();}
 
 }

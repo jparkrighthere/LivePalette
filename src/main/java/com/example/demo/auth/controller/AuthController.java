@@ -59,6 +59,8 @@ public class AuthController {
             user.setEmail(userSignupRequest.getEmail());
             user.setPassword(userSignupRequest.getPassword());
             user.setUsername(userSignupRequest.getUsername());
+            user.setField(userSignupRequest.getField());
+            user.setCareer(userSignupRequest.getCareer());
             user.setRole(Role.USER);//회원가입으로는 항상 user 롤을 부여하도록 한다.
 
             userService.save(user);
