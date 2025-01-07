@@ -1,46 +1,62 @@
 package com.example.demo.auth.filter;
 
 import com.example.demo.auth.constants.AuthConstants;
+import com.example.demo.auth.dto.LoginResponse;
+import com.example.demo.auth.dto.UserLoginRequest;
 import com.example.demo.auth.jwt.JWTUtil;
 import com.example.demo.user.model.CustomUserDetail;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.StreamUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
-@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final ObjectMapper objectMapper;
 
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, ObjectMapper objectMapper) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.objectMapper = objectMapper;
+        setFilterProcessesUrl("/signin");
+    }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)throws AuthenticationException{
 
-        //클라이언트 요청에서 username, password 추출
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
-        //로그 찍어보기
-        log.info("username: {}", username);
-        log.info("password: {}", password);
+        try {
+            ServletInputStream inputStream = request.getInputStream();
+            String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
 
-
-        //spring security에서 검증하기 위해서는 username, password를   token에 담아야 한다.
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
-        //token을 authenticationManager로 전달
-        return authenticationManager.authenticate(authRequest);
+            UserLoginRequest loginRequest = objectMapper.readValue(messageBody, UserLoginRequest.class);
+            //spring security에서 검증하기 위해서는 username, password를   token에 담아야 한다.
+            UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+            //token을 authenticationManager로 전달
+            return authenticationManager.authenticate(authRequest);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain filterChain,Authentication authentication){
+                                            FilterChain filterChain,Authentication authentication) throws IOException {
         //login 성공시 실행하는 로직
         CustomUserDetail customUserDetail = (CustomUserDetail) authentication.getPrincipal();
 
@@ -55,6 +71,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader(AuthConstants.JWT_ISSUE_HEADER, AuthConstants.ACCESS_PREFIX + accessToken);
         response.addCookie(jwtUtil.createCookie(AuthConstants.REFRESH_PREFIX, refreshToken));
         response.setStatus(HttpServletResponse.SC_OK);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        LoginResponse data = new LoginResponse(customUserDetail.getUser());
+
+        //json으로 변환
+        String result = objectMapper.writeValueAsString(data);
+
+        response.getWriter().print(result);
     }
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
