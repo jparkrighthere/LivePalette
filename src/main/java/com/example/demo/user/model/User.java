@@ -11,12 +11,10 @@ public class User {
     @Id
     private String email;
     private String password;
-    private String name;
-
-    private String profileImg;
-    private String[] roomIds;
+    private String username;
+    private String profile;
+    private String[] roomIdList;
     private Long career;
     private String field;
-
     private Role role;
 }

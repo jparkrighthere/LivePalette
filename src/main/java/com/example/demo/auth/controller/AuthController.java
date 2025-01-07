@@ -1,15 +1,12 @@
 package com.example.demo.auth.controller;
 
 import com.example.demo.auth.constants.AuthConstants;
-import com.example.demo.auth.dto.LoginResponse;
-import com.example.demo.auth.dto.UserLoginRequest;
 import com.example.demo.auth.dto.UserSignupRequest;
 import com.example.demo.auth.jwt.JWTUtil;
 import com.example.demo.auth.jwt.TokenStatus;
 import com.example.demo.user.Role;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
-import com.example.demo.user.service.CustomUserDetailService;
 import com.example.demo.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -44,7 +40,7 @@ public class AuthController {
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority grantedAuthority = iterator.next();
         String role = grantedAuthority.getAuthority();
-        return ResponseEntity.status(200).body("admin/test success : " +userDetail.getUser().getName()+"["+role+"]");
+        return ResponseEntity.status(200).body("admin/test success : " +userDetail.getUser().getUsername()+"["+role+"]");
     }
     @GetMapping("/test")
     public ResponseEntity<?> publicTest(HttpServletResponse response) {
@@ -62,7 +58,7 @@ public class AuthController {
             User user = new User();
             user.setEmail(userSignupRequest.getEmail());
             user.setPassword(userSignupRequest.getPassword());
-            user.setName(userSignupRequest.getUsername());
+            user.setUsername(userSignupRequest.getUsername());
             user.setRole(Role.USER);//회원가입으로는 항상 user 롤을 부여하도록 한다.
 
             userService.save(user);
@@ -94,7 +90,7 @@ public class AuthController {
 
         User user = new User();
         user.setEmail(email);
-        user.setName(username);
+        user.setUsername(username);
         user.setRole(Role.valueOf(role));
 
         String accessToken = jwtUtil.generateAccessToken(user);
