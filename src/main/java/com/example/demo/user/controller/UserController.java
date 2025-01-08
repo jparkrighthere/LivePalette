@@ -1,5 +1,6 @@
 package com.example.demo.user.controller;
 
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.example.demo.user.dto.UserGetProfileResponse;
 import com.example.demo.user.dto.UserUpdateProfileRequest;
+import com.example.demo.user.dto.UserGetRoomIdListResponse;
 import com.example.demo.user.model.User;
 
 import java.util.Base64;
@@ -66,5 +68,22 @@ public class UserController {
         userGetProfileResponse.setCareer(user.getCareer());
 
         return ResponseEntity.status(200).body(userGetProfileResponse);
+    }
+
+    @GetMapping("/room/{base64Email}")
+    public ResponseEntity<?> getRoomIdList(@PathVariable String base64Email){
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+        CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String tokenEmail = customUserDetail.getUsername();
+        if (!decodedEmail.equals(tokenEmail)) {
+            return ResponseEntity.status(403).body("Forbidden");
+        }
+
+        UserDetails userDetails = customUserDetailService.loadUserByUsername(decodedEmail);
+        User user = ((CustomUserDetail) userDetails).getUser();
+        UserGetRoomIdListResponse  roomGetRoomIdListResponse = new UserGetRoomIdListResponse();
+        roomGetRoomIdListResponse.setRoomIdList(user.getRoomIdList());
+
+        return ResponseEntity.status(200).body(roomGetRoomIdListResponse);
     }
 }
