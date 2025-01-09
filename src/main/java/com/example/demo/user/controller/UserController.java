@@ -38,7 +38,7 @@ public class UserController {
             return ResponseEntity.status(403).body("Forbidden");
         }
 
-        User user = customUserDetail.getUser();
+        User user = userService.findByEmail(decodedEmail);
 
         // 프로필 업데이트
         user = userService.updateProfile(user, updateUserRequest);
@@ -56,7 +56,7 @@ public class UserController {
             return ResponseEntity.status(403).body("Forbidden");
         }
 
-        User user = customUserDetail.getUser();
+        User user = userService.findByEmail(decodedEmail);
 
         UserGetProfileResponse userGetProfileResponse = new UserGetProfileResponse();
         userGetProfileResponse.setUsername(user.getUserName());
@@ -64,7 +64,7 @@ public class UserController {
         userGetProfileResponse.setProfile(user.getProfile());
         userGetProfileResponse.setUserType(user.getUserType());
         userGetProfileResponse.setCareer(user.getCareer());
-        userGetProfileResponse.setSocialLink(user.getCareer());
+        userGetProfileResponse.setSocialLink(user.getSocialLink());
         userGetProfileResponse.setPortfolioImageList(user.getPortfolioImageList());
         userGetProfileResponse.setPortfolioDescription(user.getPortfolioDescription());
 
