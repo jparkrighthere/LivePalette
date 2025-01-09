@@ -12,7 +12,9 @@ public class User {
     private String email;
     private String password;
     private String userName;
+    private String profile;
     private Role userType;
+
 
     //디자이너 전용
     private String career;
