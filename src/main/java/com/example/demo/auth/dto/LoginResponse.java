@@ -3,7 +3,6 @@ package com.example.demo.auth.dto;
 import com.example.demo.user.Role;
 import com.example.demo.user.model.User;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 public class LoginResponse {

@@ -1,5 +1,6 @@
 package com.example.demo.user.service;
 
+import com.example.demo.user.Role;
 import com.example.demo.user.dto.UserUpdateProfileRequest;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
@@ -59,17 +60,33 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
         userRepository.deleteById(email);
     }
 
-    public User updateProfile(User user, UserUpdateProfileRequest updateUserRequest) {
-        // 업데이트할 필드들 처리
-        updateUserRequest.getUsername().ifPresent(user::setUserName);
-        updateUserRequest.getProfile().ifPresent(user::setProfile);
-        updateUserRequest.getUserType().ifPresent(user::setUserType);
-        updateUserRequest.getCareer().ifPresent(user::setCareer);
-        updateUserRequest.getSocialLink().ifPresent(user::setSocialLink);
-        updateUserRequest.getPortfolioImageList().ifPresent(user::setPortfolioImageList);
-        updateUserRequest.getPortfolioDescription().ifPresent(user::setPortfolioDescription);
+    public void updateProfile(User user, UserUpdateProfileRequest updateUserRequest) {
+        if (updateUserRequest.getUserName() != null) {
+            user.setUserName(updateUserRequest.getUserName());
+        }
+        if (updateUserRequest.getProfile() != null) {
+            user.setProfile(updateUserRequest.getProfile());
+        }
+        if (updateUserRequest.getUserType() != null) {
+            user.setUserType(updateUserRequest.getUserType());
+        }
+        if (updateUserRequest.getCareer() != null) {
+            user.setCareer(updateUserRequest.getCareer());
+        }
+        if (updateUserRequest.getSocialLink() != null) {
+            user.setSocialLink(updateUserRequest.getSocialLink());
+        }
+        if (updateUserRequest.getPortfolioImageList() != null) {
+            user.setPortfolioImageList(updateUserRequest.getPortfolioImageList());
+        }
+        if (updateUserRequest.getPortfolioDescription() != null) {
+            user.setPortfolioDescription(updateUserRequest.getPortfolioDescription());
+        }
 
         userRepository.save(user);
-        return user;
+    }
+
+    public List<User> findUsersByRole(Role userType) {
+        return userRepository.findUsersByRole(userType);
     }
 }
