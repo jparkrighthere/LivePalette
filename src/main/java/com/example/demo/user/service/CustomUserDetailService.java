@@ -87,6 +87,6 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
     }
 
     public List<User> findUsersByRole(Role userType) {
-        return userRepository.findUsersByRole(userType);
+        return userRepository.findByUserType(userType);
     }
 }

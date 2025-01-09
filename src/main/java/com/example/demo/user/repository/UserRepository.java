@@ -12,5 +12,4 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends MongoRepository<User, String> {
     User findByUserName(String userName);
     List<User> findByUserType(Role userType);
-    //이렇게만 하면 username으로 디비에서 값을 조회할 수 있는건지 의문이다.
 }
