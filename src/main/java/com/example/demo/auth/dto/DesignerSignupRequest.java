@@ -3,10 +3,10 @@ package com.example.demo.auth.dto;
 import lombok.Data;
 
 @Data
-public class UserSignupRequest {
+public class DesignerSignupRequest {
     private String username;
     private String password;
     private String email;
-    private Long career;
-    private String field;
+    private String career;
+    private String socialLink;
 }

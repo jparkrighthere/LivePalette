@@ -1,11 +1,11 @@
 package com.example.demo.auth.controller;
 
 import com.example.demo.auth.constants.AuthConstants;
-import com.example.demo.auth.dto.UserSignupRequest;
+import com.example.demo.auth.dto.ClientSignupRequest;
+import com.example.demo.auth.dto.DesignerSignupRequest;
 import com.example.demo.auth.jwt.JWTUtil;
 import com.example.demo.auth.jwt.TokenStatus;
 import com.example.demo.user.Role;
-import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
 import com.example.demo.user.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -15,13 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
-import java.util.Iterator;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,38 +24,32 @@ public class AuthController {
     private final UserService userService;
     private final JWTUtil jwtUtil;
 
-    @GetMapping("/admin/test")
-    public ResponseEntity<?> adminTest(HttpServletResponse response) {
-        //get current username
-        CustomUserDetail userDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //get current user role
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority grantedAuthority = iterator.next();
-        String role = grantedAuthority.getAuthority();
-        return ResponseEntity.status(200).body("admin/test success : " +userDetail.getUser().getUsername()+"["+role+"]");
+    @PostMapping("/signup/client")
+    public ResponseEntity<?> signupClient(@RequestBody ClientSignupRequest clientSignupRequest) {
+        return signup(clientSignupRequest.getEmail(), clientSignupRequest.getPassword(),
+                clientSignupRequest.getUsername(), null,null,Role.CLIENT);
     }
-    @GetMapping("/test")
-    public ResponseEntity<?> publicTest(HttpServletResponse response) {
+    @PostMapping("/signup/designer")
+    public ResponseEntity<?> signupDesigner(@RequestBody DesignerSignupRequest designerSignupRequest) {
+        return signup(designerSignupRequest.getEmail(), designerSignupRequest.getPassword(),
+                designerSignupRequest.getUsername(), designerSignupRequest.getCareer(),
+                designerSignupRequest.getSocialLink(), Role.DESIGNER);
+    }
 
-        return ResponseEntity.status(200).body("/test success");
-    }
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody UserSignupRequest userSignupRequest) {
+    private ResponseEntity<?> signup(String email,String password,String username,String career,String socialLink,Role userType) {
         try{
             //사용자 중복 확인
-            if(userService.findByEmail(userSignupRequest.getEmail()) != null) {
-                return ResponseEntity.status(409).body("Email already exists");
+            if(userService.findByEmail(email) != null||userService.findByUsername(username) != null) {
+                return ResponseEntity.status(409).body("Email or Username already exists");
             }
 
             User user = new User();
-            user.setEmail(userSignupRequest.getEmail());
-            user.setPassword(userSignupRequest.getPassword());
-            user.setUsername(userSignupRequest.getUsername());
-            user.setField(userSignupRequest.getField());
-            user.setCareer(userSignupRequest.getCareer());
-            user.setRole(Role.USER);//회원가입으로는 항상 user 롤을 부여하도록 한다.
+            user.setEmail(email);
+            user.setPassword(password);
+            user.setUserName(username);
+            user.setCareer(career);
+            user.setSocialLink(socialLink);
+            user.setUserType(userType);
 
             userService.save(user);
             return ResponseEntity.status(201).body("Signup successful");
@@ -92,8 +80,8 @@ public class AuthController {
 
         User user = new User();
         user.setEmail(email);
-        user.setUsername(username);
-        user.setRole(Role.valueOf(role));
+        user.setUserName(username);
+        user.setUserType(Role.valueOf(role));
 
         String accessToken = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
