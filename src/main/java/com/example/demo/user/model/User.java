@@ -11,10 +11,13 @@ public class User {
     @Id
     private String email;
     private String password;
-    private String username;
-    private String profile;
-    private String[] roomIdList;
-    private Long career;
-    private String field;
-    private Role role;
+    private String userName;
+    private Role userType;
+
+    //디자이너 전용
+    private String career;
+    private String socialLink;
+    private String[] portfolioImageList;
+    private String portfolioDescription;
+
 }
