@@ -73,9 +73,9 @@ public class JWTUtil {
 
     private Map<String,Object> createClaims(User user) {
         Map<String,Object> claims = new HashMap<>();
-        claims.put("user", user.getUsername());
+        claims.put("user", user.getUserName());
         claims.put("email", user.getEmail());
-        claims.put("role", user.getRole());
+        claims.put("role", user.getUserType());
         return claims;
     }
 

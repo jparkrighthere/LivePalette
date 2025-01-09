@@ -10,7 +10,7 @@ public final class AuthConstants {
     //허용된 URI목록
     public static final String[] PERMITTED_URI = {
             "/signin",
-            "/signup",
+            "/signup/**",
             "/reissue",
     };
     //admin user만 접근 가능한 URI
