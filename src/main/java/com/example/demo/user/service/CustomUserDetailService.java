@@ -56,10 +56,13 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
 
     public User updateProfile(User user, UserUpdateProfileRequest updateUserRequest) {
         // 업데이트할 필드들 처리
-        updateUserRequest.getUsername().ifPresent(user::setUsername);
+        updateUserRequest.getUsername().ifPresent(user::setUserName);
         updateUserRequest.getProfile().ifPresent(user::setProfile);
-        updateUserRequest.getField().ifPresent(user::setField);
+        updateUserRequest.getUserType().ifPresent(user::setUserType);
         updateUserRequest.getCareer().ifPresent(user::setCareer);
+        updateUserRequest.getSocialLink().ifPresent(user::setSocialLink);
+        updateUserRequest.getPortfolioImageList().ifPresent(user::setPortfolioImageList);
+        updateUserRequest.getPortfolioDescription().ifPresent(user::setPortfolioDescription);
 
         userRepository.save(user);
         return user;
