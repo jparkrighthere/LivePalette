@@ -61,26 +61,48 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
     }
 
     public void updateProfile(User user, UserUpdateProfileRequest updateUserRequest) {
+        // 필수 필드인 userName, userType은 null이 아니므로 null 체크를 하지 않는다.
         if (updateUserRequest.getUserName() != null) {
             user.setUserName(updateUserRequest.getUserName());
-        }
-        if (updateUserRequest.getProfile() != null) {
-            user.setProfile(updateUserRequest.getProfile());
         }
         if (updateUserRequest.getUserType() != null) {
             user.setUserType(updateUserRequest.getUserType());
         }
+
+        // 선택 필드는 null일 경우에만 null로 설정한다.
+        if (updateUserRequest.getProfile() != null) {
+            user.setProfile(updateUserRequest.getProfile());
+        }
+        else if (user.getProfile() != null && updateUserRequest.getProfile() == null) {
+            user.setProfile(null);
+        }
+
         if (updateUserRequest.getCareer() != null) {
             user.setCareer(updateUserRequest.getCareer());
         }
+        else if (user.getCareer() != null && updateUserRequest.getCareer() == null) {
+            user.setCareer(null);
+        }
+
         if (updateUserRequest.getSocialLink() != null) {
             user.setSocialLink(updateUserRequest.getSocialLink());
         }
+        else if (user.getSocialLink() != null && updateUserRequest.getSocialLink() == null) {
+            user.setSocialLink(null);
+        }
+
         if (updateUserRequest.getPortfolioImageList() != null) {
             user.setPortfolioImageList(updateUserRequest.getPortfolioImageList());
         }
+        else if (user.getPortfolioImageList() != null && updateUserRequest.getPortfolioImageList() == null) {
+            user.setPortfolioImageList(null);
+        }
+
         if (updateUserRequest.getPortfolioDescription() != null) {
             user.setPortfolioDescription(updateUserRequest.getPortfolioDescription());
+        }
+        else if (user.getPortfolioDescription() != null && updateUserRequest.getPortfolioDescription() == null) {
+            user.setPortfolioDescription(null);
         }
 
         userRepository.save(user);
