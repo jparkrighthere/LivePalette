@@ -1,6 +1,5 @@
 package com.example.demo.user.controller;
 
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,11 +9,13 @@ import com.example.demo.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+import com.example.demo.user.Role;
 import com.example.demo.user.dto.UserGetProfileResponse;
 import com.example.demo.user.dto.UserUpdateProfileRequest;
 import com.example.demo.user.model.User;
 
 import java.util.Base64;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -27,21 +28,30 @@ public class UserController {
     // 오류가 안나는데 생성자 주입을 하게 되면 자동으로 생성해줘서 에러 방지 가능, 자동 생성해주니까 객체 생성할 필요가 없음
     //
 
-
     @PatchMapping("/profile/{base64Email}")
     public ResponseEntity<?> updateProfile(@PathVariable String base64Email, @RequestBody UserUpdateProfileRequest updateUserRequest) {
         // Base64로 인코딩된 이메일 디코딩
         String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String tokenEmail = customUserDetail.getUsername();
+        // 토큰의 이메일과 디코딩된 이메일이 다르면
         if (!decodedEmail.equals(tokenEmail)) {
             return ResponseEntity.status(403).body("Forbidden");
         }
 
         User user = userService.findByEmail(decodedEmail);
+        // 유저가 없으면
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        // 유저네임이 이미 존재하면
+        if (userService.findByUsername(updateUserRequest.getUserName()) != null) {
+            return ResponseEntity.status(409).body("Username already exists");
+        }
 
         // 프로필 업데이트
-        user = userService.updateProfile(user, updateUserRequest);
+        userService.updateProfile(user, updateUserRequest);
 
         return ResponseEntity.status(200).body("Profile updated successfully");
     }
@@ -52,12 +62,18 @@ public class UserController {
         String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String tokenEmail = customUserDetail.getUsername();
+        // 토큰의 이메일과 디코딩된 이메일이 다르면 
         if (!decodedEmail.equals(tokenEmail)) {
             return ResponseEntity.status(403).body("Forbidden");
         }
 
         User user = userService.findByEmail(decodedEmail);
+        // 유저가 없으면
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
 
+        // 프로필 조회
         UserGetProfileResponse userGetProfileResponse = new UserGetProfileResponse();
         userGetProfileResponse.setUsername(user.getUserName());
         userGetProfileResponse.setEmail(user.getEmail());
@@ -71,4 +87,12 @@ public class UserController {
         return ResponseEntity.status(200).body(userGetProfileResponse);
     }
 
+    @GetMapping("/designers")
+    public ResponseEntity<?> getDesigners() {
+        List<User> designers = userService.findUsersByRole(Role.DESIGNER);
+        if (designers.isEmpty()) {
+            return ResponseEntity.status(404).body("No designers found");
+        }
+        return ResponseEntity.status(200).body(designers);
+    }
 }
