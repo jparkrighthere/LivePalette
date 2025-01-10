@@ -55,7 +55,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         //logout process
-        //jwtUtil.deleteRefreshToken(token);
+        jwtUtil.deleteRefreshToken(token);
         //reset cookie
         Cookie cookie = new Cookie(AuthConstants.REFRESH_PREFIX, null);
         cookie.setMaxAge(0);

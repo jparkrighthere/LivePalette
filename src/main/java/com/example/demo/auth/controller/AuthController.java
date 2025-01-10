@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -68,12 +69,13 @@ public class AuthController {
                 reissueToken = cookie.getValue();
         }
         if(jwtUtil.validateRefreshToken(reissueToken)== TokenStatus.INVALID
-                /*||jwtUtil.isExistRefreshToken(reissueToken)*/)
+                ||!jwtUtil.isExistRefreshToken(reissueToken))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid refresh token");
 
-        if(jwtUtil.validateRefreshToken(reissueToken)==TokenStatus.EXPIRED)
+        if(jwtUtil.validateRefreshToken(reissueToken)==TokenStatus.EXPIRED) {
+            jwtUtil.deleteRefreshToken(reissueToken);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Expired refresh token");
-
+        }
         String email = jwtUtil.getUserEmailByRefreshToken(reissueToken);
         String username = jwtUtil.getUserNameByRefreshToken(reissueToken);
         String role = jwtUtil.getUserRoleByRefreshToken(reissueToken);
@@ -87,8 +89,8 @@ public class AuthController {
         String refreshToken = jwtUtil.generateRefreshToken(user);
 
         //기존의 refresh token 삭제,새로 저장
-        //jwtUtil.deleteRefreshToken(reissueToken);
-        //jwtUtil.addRefreshToken(refreshToken,user.getEmail());
+        jwtUtil.deleteRefreshToken(reissueToken);
+        jwtUtil.addRefreshToken(refreshToken,user.getEmail());
 
         //재발급시 refreshToken도 재발급 => Refresh Rotate 방식
         response.addHeader(AuthConstants.JWT_ISSUE_HEADER, AuthConstants.ACCESS_PREFIX + accessToken);

@@ -61,8 +61,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         log.info("refreshToken: {}", refreshToken);
         log.info("accessToken: {}", accessToken);
 
-        //redis 설정이 완료되면 테스트 해봐야 함
-        //jwtUtil.addRefreshToken(refreshToken, customUserDetail.getUser().getEmail());
+
+        jwtUtil.addRefreshToken(refreshToken, customUserDetail.getUser().getEmail());
 
         response.addHeader(AuthConstants.JWT_ISSUE_HEADER, AuthConstants.ACCESS_PREFIX + accessToken);
         response.addCookie(jwtUtil.createCookie(AuthConstants.REFRESH_PREFIX, refreshToken));

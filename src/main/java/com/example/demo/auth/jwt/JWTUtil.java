@@ -1,7 +1,6 @@
 package com.example.demo.auth.jwt;
 
 import com.example.demo.auth.model.RefreshToken;
-import com.example.demo.auth.repository.RefreshRepository;
 import com.example.demo.user.model.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -12,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -25,18 +25,18 @@ import java.util.Map;
 @Slf4j
 @PropertySource("classpath:application-jwt.properties")
 public class JWTUtil {
-    private final RefreshRepository refreshRepository;
+    private final RedisTemplate<String, RefreshToken> redisTemplate;
 
     private final Key ACCESS_SECRET_KEY;
     private final Key REFRESH_SECRET_KEY;
     private final long ACCESS_TOKEN_EXPIRATION_TIME;
     private final long REFRESH_TOKEN_EXPIRATION_TIME;
-    public JWTUtil(RefreshRepository refreshRepository,
+    public JWTUtil(RedisTemplate<String, RefreshToken> redisTemplate,
                     @Value("${jwt.access-secret}") String accessSecret,
                     @Value("${jwt.refresh-secret}") String refreshSecret,
                     @Value("${jwt.access-expiration}") long accessExpiration,
                     @Value("${jwt.refresh-expiration}") long refreshExpiration) {
-        this.refreshRepository = refreshRepository;
+        this.redisTemplate = redisTemplate;
         ACCESS_SECRET_KEY = getSigningKey(accessSecret);
         REFRESH_SECRET_KEY = getSigningKey(refreshSecret);
         ACCESS_TOKEN_EXPIRATION_TIME = accessExpiration;
@@ -170,7 +170,7 @@ public class JWTUtil {
     }
 
     /*
-     *  ******************* refresh repository ********************
+     *  ******************* refresh repository using redis ********************
      * */
     public void addRefreshToken(String refreshToken,String email){
         Date date = new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME);
@@ -180,12 +180,18 @@ public class JWTUtil {
         entity.setToken(refreshToken);
         entity.setExpiration(date.toString());
 
-        refreshRepository.save(entity);
+        redisTemplate.opsForValue().set(email,entity);
     }
-    public boolean isExistRefreshToken(String token){
-        return refreshRepository.findEmailByToken(token)!=null;
+    public RefreshToken getRefreshToken(String token){
+        String email = getUserEmailByRefreshToken(token);
+        return redisTemplate.opsForValue().get(email);
     }
     public void deleteRefreshToken(String token){
-        refreshRepository.deleteByToken(token);
+        String email = getUserEmailByRefreshToken(token);
+        redisTemplate.delete(email);
+    }
+
+    public boolean isExistRefreshToken(String token) {
+        return getRefreshToken(token)!=null;
     }
 }
