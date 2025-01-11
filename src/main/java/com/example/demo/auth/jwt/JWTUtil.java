@@ -181,6 +181,7 @@ public class JWTUtil {
         entity.setExpiration(date.toString());
 
         redisTemplate.opsForValue().set(email,entity);
+        log.info("redis add refresh token {}",getRefreshToken(refreshToken));
     }
     public RefreshToken getRefreshToken(String token){
         String email = getUserEmailByRefreshToken(token);

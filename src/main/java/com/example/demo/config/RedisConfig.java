@@ -15,8 +15,6 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 @RequiredArgsConstructor
 public class RedisConfig {
 
-    private final ObjectMapper objectMapper;
-
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         //기본적으로 host=Localhost, port=6379
@@ -31,7 +29,7 @@ public class RedisConfig {
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
         //Value Serializer
-        Jackson2JsonRedisSerializer<RefreshToken> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, RefreshToken.class);
+        Jackson2JsonRedisSerializer<RefreshToken> serializer = new Jackson2JsonRedisSerializer<>(new ObjectMapper(), RefreshToken.class);
         redisTemplate.setValueSerializer(serializer);
         return redisTemplate;
     }
