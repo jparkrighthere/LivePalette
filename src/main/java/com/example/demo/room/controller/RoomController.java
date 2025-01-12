@@ -20,9 +20,6 @@ public class RoomController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createRoom(@RequestBody RoomCreateDto roomCreateDto) {
-        // Redis 메세지 발행
-        roomService.publish("test-channel", "test-message");
-
         String roomId = roomService.createRoom(roomCreateDto);
         return ResponseEntity.status(201).body(roomId);
     }

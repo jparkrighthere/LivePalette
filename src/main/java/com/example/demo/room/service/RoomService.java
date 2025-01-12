@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +18,24 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class RoomService {
-    private final RedisTemplate<String, String> redisStringTemplate;
+    private final RedisTemplate<String, String> redisPublishTemplate;
     private final String SALT_KEY_PREFIX = "salt:";
+    private final String ROOM_KEY_PREFIX = "room:";
 
-    public void publish(String channel, String message) {
-        redisStringTemplate.convertAndSend(channel, message);
+    public String createRoom(RoomCreateDto roomCreateDto) {
+        String salt = generateSalt();
+        String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
+        redisPublishTemplate.opsForValue().set(saltKey, salt, 1, TimeUnit.DAYS);
+        String roomId = generateHash(roomCreateDto.getUserName() + roomCreateDto.getEnterCode() + salt);
+
+        // Redis 메세지 발행
+        publish(ROOM_KEY_PREFIX + roomId, "Host " + roomCreateDto.getUserName() + " created room " + roomId);
+
+        return ROOM_KEY_PREFIX + roomId;
+    }
+
+    private void publish(String channel, String message) {
+        redisPublishTemplate.convertAndSend(channel, message);
     }
 
     private String generateHash(String input) {
@@ -47,14 +59,5 @@ public class RoomService {
 
     private String generateSalt() {
         return UUID.randomUUID().toString();
-    }
-
-    public String createRoom(RoomCreateDto roomCreateDto) {
-        String salt = generateSalt();
-        String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
-        redisStringTemplate.opsForValue().set(saltKey, salt, 1, TimeUnit.DAYS);
-        String roomId = generateHash(roomCreateDto.getUserName() + roomCreateDto.getEnterCode() + salt);
-
-        return roomId;
     }
 }
