@@ -95,4 +95,22 @@ public class UserController {
         }
         return ResponseEntity.status(200).body(designers);
     }
+
+    @DeleteMapping("/delete/{base64Email}")
+    public ResponseEntity<?> deleteUser(@PathVariable String base64Email) {
+        CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String tokenEmail = customUserDetail.getUsername();
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+        User user = userService.findByEmail(tokenEmail);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+        if(user.getUserType() != Role.ADMIN){
+            if(!decodedEmail.equals(tokenEmail)){
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+        }
+        userService.deleteByEmail(user.getEmail());
+        return ResponseEntity.status(200).body("User deleted successfully");
+    }
 }
