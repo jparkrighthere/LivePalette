@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.room.dto.RoomCreateDto;
 import com.example.demo.room.service.RoomService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,6 @@ public class RoomController {
     @PostMapping("/create")
     public ResponseEntity<?> createRoom(@RequestBody RoomCreateDto roomCreateDto) {
         String roomId = roomService.createRoom(roomCreateDto);
-        return ResponseEntity.status(201).body(roomId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(roomId);
     }
 }

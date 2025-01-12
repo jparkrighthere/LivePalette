@@ -1,6 +1,7 @@
 package com.example.demo.user.controller;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -42,18 +43,18 @@ public class UserController {
         User user = userService.findByEmail(decodedEmail);
         // 유저가 없으면
         if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         // 유저네임이 이미 존재하면
         if (userService.findByUsername(updateUserRequest.getUserName()) != null) {
-            return ResponseEntity.status(409).body("Username already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
         }
 
         // 프로필 업데이트
         userService.updateProfile(user, updateUserRequest);
 
-        return ResponseEntity.status(200).body("Profile updated successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("Profile updated successfully");
     }
 
     @GetMapping("/profile/{base64Email}")
@@ -64,13 +65,13 @@ public class UserController {
         String tokenEmail = customUserDetail.getUsername();
         // 토큰의 이메일과 디코딩된 이메일이 다르면 
         if (!decodedEmail.equals(tokenEmail)) {
-            return ResponseEntity.status(403).body("Forbidden");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not allowed to access this profile");
         }
 
         User user = userService.findByEmail(decodedEmail);
         // 유저가 없으면
         if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         // 프로필 조회
@@ -84,15 +85,15 @@ public class UserController {
         userGetProfileResponse.setPortfolioImageList(user.getPortfolioImageList());
         userGetProfileResponse.setPortfolioDescription(user.getPortfolioDescription());
 
-        return ResponseEntity.status(200).body(userGetProfileResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(userGetProfileResponse);
     }
 
     @GetMapping("/designers")
     public ResponseEntity<?> getDesigners() {
         List<User> designers = userService.findUsersByRole(Role.DESIGNER);
         if (designers.isEmpty()) {
-            return ResponseEntity.status(404).body("No designers found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No designers found");
         }
-        return ResponseEntity.status(200).body(designers);
+        return ResponseEntity.status(HttpStatus.OK).body(designers);
     }
 }

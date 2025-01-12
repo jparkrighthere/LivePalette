@@ -40,7 +40,7 @@ public class AuthController {
         try{
             //사용자 중복 확인
             if(userService.findByEmail(email) != null||userService.findByUsername(username) != null) {
-                return ResponseEntity.status(409).body("Email or Username already exists");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Email or Username already exists");
             }
 
             User user = new User();
@@ -52,10 +52,10 @@ public class AuthController {
             user.setUserType(userType);
 
             userService.save(user);
-            return ResponseEntity.status(201).body("Signup successful");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Signup successful");
         } catch (Exception e) {
             log.error("Sign up error: {}",e.getMessage());
-            return ResponseEntity.status(500).body("Internal Server Error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
     }
 
@@ -95,6 +95,6 @@ public class AuthController {
         response.addHeader(AuthConstants.JWT_ISSUE_HEADER, AuthConstants.ACCESS_PREFIX + accessToken);
         response.addCookie(jwtUtil.createCookie(AuthConstants.REFRESH_PREFIX, refreshToken));
 
-        return ResponseEntity.status(201).body("Reissue successful");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Reissue successful");
     }
 }
