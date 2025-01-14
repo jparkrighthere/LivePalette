@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.room.dto.RoomCreateDto;
+import com.example.demo.room.dto.RoomCreateJoinRequestDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class RoomService {
     private final String SALT_KEY_PREFIX = "salt:";
     private final String ROOM_KEY_PREFIX = "room:";
 
-    public String createRoom(RoomCreateDto roomCreateDto) {
+    public String createRoom(RoomCreateJoinRequestDto roomCreateDto) {
         String salt = generateSalt();
         String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
         redisPublishTemplate.opsForValue().set(saltKey, salt, 1, TimeUnit.DAYS);
@@ -31,8 +31,23 @@ public class RoomService {
         // Redis 메세지 발행
         publish(ROOM_KEY_PREFIX + roomId, "Host " + roomCreateDto.getUserName() + " created room " + roomId);
 
-        return ROOM_KEY_PREFIX + roomId;
+        return roomId;
     }
+
+    // public String joinRoom(RoomCreateJoinRequestDto roomCreateDto) {
+    //     String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
+    //     String salt = redisPublishTemplate.opsForValue().get(saltKey);
+    //     if (salt == null) {
+    //         throw new RuntimeException("Salt not found");
+    //     }
+
+    //     String roomId = generateHash(roomCreateDto.getUserName() + roomCreateDto.getEnterCode() + salt);
+
+    //     // Redis 메세지 발행
+    //     publish(ROOM_KEY_PREFIX + roomId, "User " + roomCreateDto.getUserName() + " joined room " + roomId);
+
+    //     return roomId;
+    // }
 
     private void publish(String channel, String message) {
         redisPublishTemplate.convertAndSend(channel, message);
