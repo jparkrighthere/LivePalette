@@ -3,6 +3,7 @@ package com.example.demo.room.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +11,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.room.dto.RoomCreateJoinRequestDto;
+import com.example.demo.room.model.Room;
+import com.example.demo.room.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class RoomService {
+    private final RoomRepository roomRepository;
     private final RedisTemplate<String, String> redisPublishTemplate;
     private final String SALT_KEY_PREFIX = "salt:";
     private final String ROOM_KEY_PREFIX = "room:";
@@ -30,6 +34,12 @@ public class RoomService {
 
         // Redis 메세지 발행
         publish(ROOM_KEY_PREFIX + roomId, "Host " + roomCreateDto.getUserName() + " created room " + roomId);
+        Room room = new Room();
+        room.setRoomId(roomId);
+        room.setEnterCode(roomCreateDto.getEnterCode());
+        room.setUserNameList(new ArrayList<String>());
+        room.getUserNameList().add(roomCreateDto.getUserName());
+        roomRepository.save(room);
 
         return roomId;
     }
@@ -37,13 +47,26 @@ public class RoomService {
     public String joinRoom(RoomCreateJoinRequestDto roomJoinDto) {
         String saltKey = SALT_KEY_PREFIX + roomJoinDto.getUserName();
         String salt = redisPublishTemplate.opsForValue().get(saltKey);
-        if (salt == null) {
-            return null;
-        }
         String roomId = generateHash(roomJoinDto.getUserName() + roomJoinDto.getEnterCode() + salt);
         // Redis 메세지 발행
         publish(ROOM_KEY_PREFIX + roomId, "User " + roomJoinDto.getUserName() + " joined room " + roomId);
 
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return null;
+        }
+        room.getUserNameList().add(roomJoinDto.getUserName());
+        roomRepository.save(room);
+
+        return roomId;
+    }
+
+    public String deleteRoom(String roomId) {
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) {
+            return null;
+        }
+        roomRepository.deleteById(roomId);
         return roomId;
     }
 

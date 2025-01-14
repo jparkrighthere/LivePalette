@@ -10,6 +10,8 @@ import com.example.demo.room.service.RoomService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -38,5 +40,13 @@ public class RoomController {
         RoomCreateJoinResponseDto roomJoinResponseDto = new RoomCreateJoinResponseDto();
         roomJoinResponseDto.setRoomId(roomId);
         return ResponseEntity.status(HttpStatus.OK).body(roomJoinResponseDto);
+    }
+
+    @DeleteMapping("{roomId}")
+    public ResponseEntity<?> deleteRoom(@PathVariable String roomId) {
+        if (roomService.deleteRoom(roomId) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Room not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Room deleted successfully");
     }
 }
