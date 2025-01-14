@@ -34,20 +34,18 @@ public class RoomService {
         return roomId;
     }
 
-    // public String joinRoom(RoomCreateJoinRequestDto roomCreateDto) {
-    //     String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
-    //     String salt = redisPublishTemplate.opsForValue().get(saltKey);
-    //     if (salt == null) {
-    //         throw new RuntimeException("Salt not found");
-    //     }
+    public String joinRoom(RoomCreateJoinRequestDto roomJoinDto) {
+        String saltKey = SALT_KEY_PREFIX + roomJoinDto.getUserName();
+        String salt = redisPublishTemplate.opsForValue().get(saltKey);
+        if (salt == null) {
+            return null;
+        }
+        String roomId = generateHash(roomJoinDto.getUserName() + roomJoinDto.getEnterCode() + salt);
+        // Redis 메세지 발행
+        publish(ROOM_KEY_PREFIX + roomId, "User " + roomJoinDto.getUserName() + " joined room " + roomId);
 
-    //     String roomId = generateHash(roomCreateDto.getUserName() + roomCreateDto.getEnterCode() + salt);
-
-    //     // Redis 메세지 발행
-    //     publish(ROOM_KEY_PREFIX + roomId, "User " + roomCreateDto.getUserName() + " joined room " + roomId);
-
-    //     return roomId;
-    // }
+        return roomId;
+    }
 
     private void publish(String channel, String message) {
         redisPublishTemplate.convertAndSend(channel, message);

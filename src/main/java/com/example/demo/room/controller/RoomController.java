@@ -29,12 +29,14 @@ public class RoomController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<?> joinRoom(@RequestBody RoomCreateJoinRequestDto roomCreateDto) {
-        String roomId = roomService.joinRoom(roomCreateDto);
-        RoomCreateJoinResponseDto roomCreateResponseDto = new RoomCreateJoinResponseDto();
-        roomCreateResponseDto.setRoomId(roomId);
-        return ResponseEntity.status(HttpStatus.OK).body(roomCreateResponseDto);
+    public ResponseEntity<?> joinRoom(@RequestBody RoomCreateJoinRequestDto roomJoinDto) {
+        String roomId = roomService.joinRoom(roomJoinDto);
+        if (roomId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Room not found");
+        }
+        //TODO: 해당 유저가 이미 참가한 방인지 확인
+        RoomCreateJoinResponseDto roomJoinResponseDto = new RoomCreateJoinResponseDto();
+        roomJoinResponseDto.setRoomId(roomId);
+        return ResponseEntity.status(HttpStatus.OK).body(roomJoinResponseDto);
     }
-
-
 }
