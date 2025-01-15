@@ -1,5 +1,10 @@
 package com.example.demo.user.controller;
 
+import com.example.demo.email.dto.EmailRequest;
+import com.example.demo.email.dto.EmailResponse;
+import com.example.demo.email.service.EmailService;
+import com.example.demo.user.dto.UserUpdatePasswordRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +28,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final EmailService emailService;
 
     @PatchMapping("/profile/{base64Email}")
     public ResponseEntity<?> updateProfile(@PathVariable String base64Email, @RequestBody UserUpdateProfileRequest updateUserRequest) {
@@ -109,4 +115,50 @@ public class UserController {
         userService.deleteByEmail(user.getEmail());
         return ResponseEntity.status(200).body("User deleted successfully");
     }
+
+    @GetMapping("/password/{base64Email}")
+    public ResponseEntity<?> authUserPW(@PathVariable String base64Email) {
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+
+        User user = userService.findByEmail(decodedEmail);
+        // 유저가 없으면
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        //인증 이메일 전송
+        String authNum = emailService.sendEmail(decodedEmail);
+        if (authNum == null) {
+            return ResponseEntity.status(403).body("Something went wrong");
+        }
+
+        EmailResponse emailResponse = new EmailResponse();
+        emailResponse.setAuthNum(authNum);
+
+        return ResponseEntity.status(200).body(emailResponse);
+    }
+
+    @PatchMapping("/password/{base64Email}")
+    public ResponseEntity<?> updatePassword(@PathVariable String base64Email, @RequestBody UserUpdatePasswordRequest updatePasswordRequest) {
+        // Base64로 인코딩된 이메일 디코딩
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+
+        User user = userService.findByEmail(decodedEmail);
+        // 유저가 없으면
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        //AuthNum Check
+        Boolean Checked = emailService.CheckAuthNum(decodedEmail,updatePasswordRequest.getAuthNum());
+        if(!Checked){
+            return ResponseEntity.status(403).body("Wrong Authorization Number");
+        }
+
+        //비밀번호 업데이트
+        userService.updatePassword(user, updatePasswordRequest);
+
+        return ResponseEntity.status(200).body("Password updated successfully");
+    }
+
 }

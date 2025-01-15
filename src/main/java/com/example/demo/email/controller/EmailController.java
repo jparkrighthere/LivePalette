@@ -16,26 +16,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/email")
 @RequiredArgsConstructor
 public class EmailController {
-    private final EmailService emailService;
-    @PostMapping("/sendEmail")
-    public ResponseEntity<?> mailSend(@RequestBody @Valid EmailRequest emailRequest) {
-        String authNum = emailService.sendEmail(emailRequest.getEmail());
-        if (authNum == null) {
-            return ResponseEntity.status(403).body("Something went wrong");
-        }
-        EmailResponse emailResponse = new EmailResponse();
-        emailResponse.setAuthNum(authNum);
-        return ResponseEntity.status(200).body(emailResponse);
-    }
-
-    @PostMapping("/mailAuthCheck")
-    public ResponseEntity<?> AuthCheck(@RequestBody @Valid EmailCheckRequest emailCheckRequest){
-        Boolean Checked=emailService.CheckAuthNum(emailCheckRequest.getEmail(),emailCheckRequest.getAuthNum());
-        if(Checked){
-            return ResponseEntity.status(200).body("Authorization Success");
-        }
-        else{
-            return ResponseEntity.status(403).body("Wrong Number");
-        }
-    }
+//    private final EmailService emailService;
+//    @PostMapping("/sendEmail")
+//    public ResponseEntity<?> mailSend(@RequestBody @Valid EmailRequest emailRequest) {
+//        String authNum = emailService.sendEmail(emailRequest.getEmail());
+//        if (authNum == null) {
+//            return ResponseEntity.status(403).body("Something went wrong");
+//        }
+//        EmailResponse emailResponse = new EmailResponse();
+//        emailResponse.setAuthNum(authNum);
+//        return ResponseEntity.status(200).body(emailResponse);
+//    }
+//
+//    @PostMapping("/mailAuthCheck")
+//    public ResponseEntity<?> AuthCheck(@RequestBody @Valid EmailCheckRequest emailCheckRequest){
+//        Boolean Checked=emailService.CheckAuthNum(emailCheckRequest.getEmail(),emailCheckRequest.getAuthNum());
+//        if(Checked){
+//            return ResponseEntity.status(200).body("Authorization Success");
+//        }
+//        else{
+//            return ResponseEntity.status(403).body("Wrong Number");
+//        }
+//    }
 }

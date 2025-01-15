@@ -1,6 +1,7 @@
 package com.example.demo.user.service;
 
 import com.example.demo.user.Role;
+import com.example.demo.user.dto.UserUpdatePasswordRequest;
 import com.example.demo.user.dto.UserUpdateProfileRequest;
 import com.example.demo.user.model.CustomUserDetail;
 import com.example.demo.user.model.User;
@@ -108,6 +109,15 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
 
         userRepository.save(user);
     }
+
+    public void updatePassword(User user, UserUpdatePasswordRequest updatePasswordRequest) {
+        //NonEmpty로 비밀번호 필수 필드
+        user.setPassword(passwordEncoder.encode(updatePasswordRequest.getPassword()));
+        log.info(user.toString());
+        userRepository.save(user);
+        log.info(user.toString());
+    }
+
 
     public List<User> findUsersByRole(Role userType) {
         return userRepository.findByUserType(userType);

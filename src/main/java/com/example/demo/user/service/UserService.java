@@ -1,5 +1,6 @@
 package com.example.demo.user.service;
 
+import com.example.demo.user.dto.UserUpdatePasswordRequest;
 import com.example.demo.user.model.User;
 import org.springframework.stereotype.Service;
 
@@ -15,5 +16,6 @@ public interface UserService {
     User findByUsername(String username);
     void deleteByEmail(String email);
     void updateProfile(User user, UserUpdateProfileRequest updateUserRequest);
+    void updatePassword(User user, UserUpdatePasswordRequest updatePasswordRequest);
     List<User> findUsersByRole(Role userType);
 }

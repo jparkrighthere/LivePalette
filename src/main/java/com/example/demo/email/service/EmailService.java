@@ -20,7 +20,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public boolean CheckAuthNum(String email,String authNum){
+    public boolean CheckAuthNum(String email, String authNum){
         if(redisUtil.getData(authNum)==null || !redisUtil.getData(authNum).equals(email)){
             return false;
         }
@@ -41,8 +41,8 @@ public class EmailService {
             helper.setFrom("livepaletteemailserver@gmail.com");
             helper.setTo(receiverEmail);
             helper.setSubject("회원 가입 인증 이메일 입니다.");
-            helper.setText(
-                    "나의 APP을 방문해주셔서 감사합니다." + 	//html 형식으로 작성 !
+            helper.setText("",
+                    "나의 APP을 방문해주셔서 감사합니다." +
                             "<br><br>" +
                             "인증 번호는 " + authNumber + "입니다." +
                             "<br>" +
