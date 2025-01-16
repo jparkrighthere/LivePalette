@@ -1,4 +1,4 @@
-package com.example.demo.email.service;
+package com.example.demo.user.email;
 
 import com.example.demo.global.util.RedisUtil;
 import jakarta.mail.MessagingException;
@@ -8,12 +8,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
 
 @Service
-public class EmailService {
-    @Autowired
-    private JavaMailSender mailSender;
+public class EmailUtil {
     @Autowired
     private RedisUtil redisUtil;
     private int authNumber;
@@ -21,21 +18,17 @@ public class EmailService {
     private JavaMailSender javaMailSender;
 
     public boolean CheckAuthNum(String email, String authNum){
-        if(redisUtil.getData(authNum)==null || !redisUtil.getData(authNum).equals(email)){
-            return false;
-        }
-        return true;
+        return redisUtil.getData(authNum) != null && redisUtil.getData(authNum).equals(email);
     }
 
     public void makeRandomNumber() {
-        Random r = new Random();
         authNumber = (int)(Math.random() * (900000)) + 100000;
     }
 
     //Create Email
     public MimeMessage createEmail(String receiverEmail) {
         makeRandomNumber();
-        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessage message = javaMailSender.createMimeMessage();
         try{
             MimeMessageHelper helper = new MimeMessageHelper(message,true,"utf-8");
             helper.setFrom("livepaletteemailserver@gmail.com");

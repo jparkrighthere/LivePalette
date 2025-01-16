@@ -1,10 +1,8 @@
 package com.example.demo.user.controller;
 
-import com.example.demo.email.dto.EmailRequest;
-import com.example.demo.email.dto.EmailResponse;
-import com.example.demo.email.service.EmailService;
+import com.example.demo.user.dto.UserVrfEmailResponse;
 import com.example.demo.user.dto.UserUpdatePasswordRequest;
-import jakarta.validation.Valid;
+import com.example.demo.user.email.EmailUtil;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +26,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final EmailService emailService;
+    private final EmailUtil emailUtil;
 
     @PatchMapping("/profile/{base64Email}")
     public ResponseEntity<?> updateProfile(@PathVariable String base64Email, @RequestBody UserUpdateProfileRequest updateUserRequest) {
@@ -127,15 +125,15 @@ public class UserController {
         }
 
         //인증 이메일 전송
-        String authNum = emailService.sendEmail(decodedEmail);
+        String authNum = emailUtil.sendEmail(decodedEmail);
         if (authNum == null) {
             return ResponseEntity.status(403).body("Something went wrong");
         }
 
-        EmailResponse emailResponse = new EmailResponse();
-        emailResponse.setAuthNum(authNum);
+        UserVrfEmailResponse userVrfEmailResponse = new UserVrfEmailResponse();
+        userVrfEmailResponse.setAuthNum(authNum);
 
-        return ResponseEntity.status(200).body(emailResponse);
+        return ResponseEntity.status(200).body(userVrfEmailResponse);
     }
 
     @PatchMapping("/password/{base64Email}")
@@ -150,7 +148,7 @@ public class UserController {
         }
 
         //AuthNum Check
-        Boolean Checked = emailService.CheckAuthNum(decodedEmail,updatePasswordRequest.getAuthNum());
+        Boolean Checked = emailUtil.CheckAuthNum(decodedEmail,updatePasswordRequest.getAuthNum());
         if(!Checked){
             return ResponseEntity.status(403).body("Wrong Authorization Number");
         }
