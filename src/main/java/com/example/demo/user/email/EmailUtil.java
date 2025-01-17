@@ -3,7 +3,6 @@ package com.example.demo.user.email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,9 +16,8 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class EmailUtil {
     private int authNumber;
-    @Autowired
-    private JavaMailSender javaMailSender;
 
+    private final JavaMailSender javaMailSender;
     private final StringRedisTemplate redisTemplate;
 
     public String getData(String key){
