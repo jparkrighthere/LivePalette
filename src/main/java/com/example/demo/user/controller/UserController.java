@@ -3,6 +3,7 @@ package com.example.demo.user.controller;
 import com.example.demo.user.dto.UserVrfEmailResponse;
 import com.example.demo.user.dto.UserUpdatePasswordRequest;
 import com.example.demo.user.email.EmailUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -103,15 +104,15 @@ public class UserController {
         String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
         User user = userService.findByEmail(tokenEmail);
         if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         if(user.getUserType() != Role.ADMIN){
             if(!decodedEmail.equals(tokenEmail)){
-                return ResponseEntity.status(403).body("Forbidden");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
             }
         }
         userService.deleteByEmail(user.getEmail());
-        return ResponseEntity.status(200).body("User deleted successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
     }
 
     @GetMapping("/password/{base64Email}")
@@ -121,19 +122,19 @@ public class UserController {
         User user = userService.findByEmail(decodedEmail);
         // 유저가 없으면
         if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         //인증 이메일 전송
         String authNum = emailUtil.sendEmail(decodedEmail);
         if (authNum == null) {
-            return ResponseEntity.status(403).body("Something went wrong");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Something went wrong");
         }
 
         UserVrfEmailResponse userVrfEmailResponse = new UserVrfEmailResponse();
         userVrfEmailResponse.setAuthNum(authNum);
 
-        return ResponseEntity.status(200).body(userVrfEmailResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(userVrfEmailResponse);
     }
 
     @PatchMapping("/password/{base64Email}")
@@ -144,19 +145,19 @@ public class UserController {
         User user = userService.findByEmail(decodedEmail);
         // 유저가 없으면
         if (user == null) {
-            return ResponseEntity.status(404).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         //AuthNum Check
         Boolean Checked = emailUtil.CheckAuthNum(decodedEmail,updatePasswordRequest.getAuthNum());
         if(!Checked){
-            return ResponseEntity.status(403).body("Wrong Authorization Number");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Wrong Authorization Number");
         }
 
         //비밀번호 업데이트
         userService.updatePassword(user, updatePasswordRequest);
 
-        return ResponseEntity.status(200).body("Password updated successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("Password updated successfully");
     }
 
 }
