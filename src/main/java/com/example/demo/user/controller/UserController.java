@@ -1,5 +1,9 @@
 package com.example.demo.user.controller;
 
+import com.example.demo.user.dto.UserVrfEmailResponse;
+import com.example.demo.user.dto.UserUpdatePasswordRequest;
+import com.example.demo.user.email.EmailUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,10 +27,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    // private final로, 필드 주입하지말고 생성자 주입으로 하는걸로, spring 실행되면 spring context
-    // continer에 잇는 빈들을 번저 생성하고 등록, user controller로 빈으로 등록되어있으니까 생성할때 생성자 주입이 아니면 null을 갖고있어도
-    // 오류가 안나는데 생성자 주입을 하게 되면 자동으로 생성해줘서 에러 방지 가능, 자동 생성해주니까 객체 생성할 필요가 없음
-    //
+    private final EmailUtil emailUtil;
 
     @PatchMapping("/profile/{base64Email}")
     public ResponseEntity<?> updateProfile(@PathVariable String base64Email, @RequestBody UserUpdateProfileRequest updateUserRequest) {
@@ -95,4 +96,68 @@ public class UserController {
         }
         return ResponseEntity.status(200).body(designers);
     }
+
+    @DeleteMapping("/delete/{base64Email}")
+    public ResponseEntity<?> deleteUser(@PathVariable String base64Email) {
+        CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String tokenEmail = customUserDetail.getUsername();
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+        User user = userService.findByEmail(tokenEmail);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        if(user.getUserType() != Role.ADMIN){
+            if(!decodedEmail.equals(tokenEmail)){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
+            }
+        }
+        userService.deleteByEmail(user.getEmail());
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
+    }
+
+    @GetMapping("/password/{base64Email}")
+    public ResponseEntity<?> authUserPW(@PathVariable String base64Email) {
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+
+        User user = userService.findByEmail(decodedEmail);
+        // 유저가 없으면
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        //인증 이메일 전송
+        String authNum = emailUtil.sendEmail(decodedEmail);
+        if (authNum == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Something went wrong");
+        }
+
+        UserVrfEmailResponse userVrfEmailResponse = new UserVrfEmailResponse();
+        userVrfEmailResponse.setAuthNum(authNum);
+
+        return ResponseEntity.status(HttpStatus.OK).body(userVrfEmailResponse);
+    }
+
+    @PatchMapping("/password/{base64Email}")
+    public ResponseEntity<?> updatePassword(@PathVariable String base64Email, @RequestBody UserUpdatePasswordRequest updatePasswordRequest) {
+        // Base64로 인코딩된 이메일 디코딩
+        String decodedEmail = new String(Base64.getUrlDecoder().decode(base64Email));
+
+        User user = userService.findByEmail(decodedEmail);
+        // 유저가 없으면
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        //AuthNum Check
+        Boolean Checked = emailUtil.CheckAuthNum(decodedEmail,updatePasswordRequest.getAuthNum());
+        if(!Checked){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Wrong Authorization Number");
+        }
+
+        //비밀번호 업데이트
+        userService.updatePassword(user, updatePasswordRequest);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Password updated successfully");
+    }
+
 }
