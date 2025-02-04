@@ -3,6 +3,7 @@ package com.example.demo.config;
 import com.example.demo.auth.model.RefreshToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -30,6 +31,17 @@ public class RedisConfig {
 
         //Value Serializer
         Jackson2JsonRedisSerializer<RefreshToken> serializer = new Jackson2JsonRedisSerializer<>(new ObjectMapper(), RefreshToken.class);
+        redisTemplate.setValueSerializer(serializer);
+        return redisTemplate;
+    }
+
+    @Bean
+    public RedisTemplate<String, String> redisPublishTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+
+        Jackson2JsonRedisSerializer<String> serializer = new Jackson2JsonRedisSerializer<>(new ObjectMapper(), String.class);
         redisTemplate.setValueSerializer(serializer);
         return redisTemplate;
     }
