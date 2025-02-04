@@ -89,7 +89,7 @@ public class RoomService {
             return hexString.toString();
         } 
         catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error generating hash", e);
+            throw new RuntimeException(e);
         }
     }
 
