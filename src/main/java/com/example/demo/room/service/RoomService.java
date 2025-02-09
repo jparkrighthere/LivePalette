@@ -5,9 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.room.dto.RoomCreateJoinRequestDto;
@@ -22,39 +20,21 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RoomService {
     private final RoomRepository roomRepository;
-    private final RedisTemplate<String, String> redisPublishTemplate;
-    private final String SALT_KEY_PREFIX = "salt:";
-    private final String ROOM_KEY_PREFIX = "room:";
-
-    public String createRoom(RoomCreateJoinRequestDto roomCreateDto) {
-        String salt = generateSalt();
-        String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
-        redisPublishTemplate.opsForValue().set(saltKey, salt, 1, TimeUnit.DAYS);
-        String roomId = generateHash(roomCreateDto.getUserName() + roomCreateDto.getEnterCode() + salt);
-
-        // Redis 메세지 발행
-        publish(ROOM_KEY_PREFIX + roomId, "Host " + roomCreateDto.getUserName() + " created room " + roomId);
-        Room room = new Room();
-        room.setRoomId(roomId);
-        room.setEnterCode(roomCreateDto.getEnterCode());
-        room.setUserNameList(new ArrayList<String>());
-        room.getUserNameList().add(roomCreateDto.getUserName());
-        roomRepository.save(room);
-
-        return roomId;
-    }
+    private final WebSocketService webSocketService;
 
     public String joinRoom(RoomCreateJoinRequestDto roomJoinDto) {
-        String saltKey = SALT_KEY_PREFIX + roomJoinDto.getUserName();
-        String salt = redisPublishTemplate.opsForValue().get(saltKey);
+        String salt = generateSalt();
         String roomId = generateHash(roomJoinDto.getUserName() + roomJoinDto.getEnterCode() + salt);
-        // Redis 메세지 발행
-        publish(ROOM_KEY_PREFIX + roomId, "User " + roomJoinDto.getUserName() + " joined room " + roomId);
 
         Room room = roomRepository.findById(roomId).orElse(null);
         if (room == null) {
-            return null;
+            room = new Room();
+            room.setRoomId(roomId);
+            room.setEnterCode(roomJoinDto.getEnterCode());
+            room.setUserNameList(new ArrayList<String>());
         }
+        String message = roomJoinDto.getUserName() + " Joined room " + roomId;
+        webSocketService.sendMessage(message); // WebSocket으로 메시지 전송
         room.getUserNameList().add(roomJoinDto.getUserName());
         roomRepository.save(room);
 
@@ -70,8 +50,8 @@ public class RoomService {
         return roomId;
     }
 
-    private void publish(String channel, String message) {
-        redisPublishTemplate.convertAndSend(channel, message);
+    private String generateSalt() {
+        return UUID.randomUUID().toString();
     }
 
     private String generateHash(String input) {
@@ -91,9 +71,5 @@ public class RoomService {
         catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String generateSalt() {
-        return UUID.randomUUID().toString();
     }
 }
