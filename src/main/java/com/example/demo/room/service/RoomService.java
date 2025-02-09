@@ -33,7 +33,7 @@ public class RoomService {
             room.setEnterCode(roomJoinDto.getEnterCode());
             room.setUserNameList(new ArrayList<String>());
         }
-        String message = roomJoinDto.getUserName() + " Joined room " + roomId;
+        String message = roomJoinDto.getUserName() + "," + roomId;
         webSocketService.sendMessage(message); // WebSocket으로 메시지 전송
         room.getUserNameList().add(roomJoinDto.getUserName());
         roomRepository.save(room);
