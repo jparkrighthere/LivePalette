@@ -52,9 +52,6 @@ dependencies {
 
 	// websocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-
-	// socketio client
-	implementation 'io.socket:socket.io-client:2.1.0'
 }
 
 tasks.named('test') {
