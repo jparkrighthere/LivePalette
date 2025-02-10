@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.room.dto.RoomCreateJoinRequestDto;
-import com.example.demo.room.dto.RoomCreateJoinResponseDto;
+import com.example.demo.room.dto.RoomJoinRequestDto;
+import com.example.demo.room.dto.RoomJoinResponseDto;
 import com.example.demo.room.service.RoomService;
 
 import org.springframework.http.HttpStatus;
@@ -23,10 +23,19 @@ public class RoomController {
     private final RoomService roomService;
 
     @PostMapping("/join")
-    public ResponseEntity<?> joinRoom(@RequestBody RoomCreateJoinRequestDto roomJoinDto) {
+    public ResponseEntity<?> joinRoom(@RequestBody RoomJoinRequestDto roomJoinDto) {
         String roomId = roomService.joinRoom(roomJoinDto);
-        //TODO: 해당 유저가 이미 참가한 방인지 확인
-        RoomCreateJoinResponseDto roomJoinResponseDto = new RoomCreateJoinResponseDto();
+        // enterCode가 틀린 경우
+        if (roomId.equals("Invalid enter code")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid enter code");
+        }
+
+        // 이미 참가한 방인 경우
+        if (roomId.equals("Already joined")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Already joined");
+        }
+        
+        RoomJoinResponseDto roomJoinResponseDto = new RoomJoinResponseDto();
         roomJoinResponseDto.setRoomId(roomId);
         return ResponseEntity.status(HttpStatus.OK).body(roomJoinResponseDto);
     }

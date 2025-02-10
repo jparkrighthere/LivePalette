@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.room.dto.RoomCreateJoinRequestDto;
+import com.example.demo.room.dto.RoomJoinRequestDto;
 import com.example.demo.room.model.Room;
 import com.example.demo.room.repository.RoomRepository;
 
@@ -20,9 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RoomService {
     private final RoomRepository roomRepository;
-    private final WebSocketService webSocketService;
 
-    public String joinRoom(RoomCreateJoinRequestDto roomJoinDto) {
+    public String joinRoom(RoomJoinRequestDto roomJoinDto) {
         String salt = generateSalt();
         String roomId = generateHash(roomJoinDto.getUserName() + roomJoinDto.getEnterCode() + salt);
 
@@ -33,8 +32,17 @@ public class RoomService {
             room.setEnterCode(roomJoinDto.getEnterCode());
             room.setUserNameList(new ArrayList<String>());
         }
-        String message = roomJoinDto.getUserName() + "," + roomId;
-        webSocketService.sendMessage(message); // WebSocket으로 메시지 전송
+
+        // enterCode 확인
+        if (!room.getEnterCode().equals(roomJoinDto.getEnterCode())) {
+            return "Invalid enter code";
+        }
+
+        // 이미 참가한 방인지 확인
+        if (room.getUserNameList().contains(roomJoinDto.getUserName())) {
+            return "Already joined";
+        }
+
         room.getUserNameList().add(roomJoinDto.getUserName());
         roomRepository.save(room);
 
