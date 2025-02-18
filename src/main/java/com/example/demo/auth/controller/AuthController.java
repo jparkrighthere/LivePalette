@@ -1,6 +1,7 @@
 package com.example.demo.auth.controller;
 
 import com.example.demo.auth.constants.AuthConstants;
+import com.example.demo.auth.dto.CheckUsernameRequest;
 import com.example.demo.auth.dto.ClientSignupRequest;
 import com.example.demo.auth.dto.DesignerSignupRequest;
 import com.example.demo.auth.jwt.JWTUtil;
@@ -58,7 +59,13 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
     }
+    @PostMapping("/check-username")
+    public ResponseEntity<?> checkEmail(@RequestBody CheckUsernameRequest checkUsernameRequest) {
+        if(userService.findByUsername(checkUsernameRequest.getUsername()) != null)
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
 
+        return ResponseEntity.status(HttpStatus.OK).body("Check email successful");
+    }
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request,HttpServletResponse response) {
         String reissueToken = null;
