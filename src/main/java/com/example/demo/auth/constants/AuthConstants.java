@@ -12,6 +12,7 @@ public final class AuthConstants {
             "/signin",
             "/signup/**",
             "/reissue",
+            "/check-username",
     };
     //admin user만 접근 가능한 URI
     public static final String[] ADMIN_URI = {
