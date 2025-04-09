@@ -19,7 +19,6 @@ public class User {
     //디자이너 전용
     private String career;
     private String socialLink;
-    private String[] portfolioImageList;
     private String portfolioDescription;
-
+    private String[] designerDetails;
 }

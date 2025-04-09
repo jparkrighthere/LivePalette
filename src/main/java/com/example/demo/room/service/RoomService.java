@@ -1,99 +1,130 @@
 package com.example.demo.room.service;
 
+import com.example.demo.room.dto.RoomCreateRequestDto;
+import com.example.demo.room.dto.RoomJoinRequestDto;
+import com.example.demo.room.model.Room;
+import com.example.demo.room.model.Room.RoomStatus;
+import com.example.demo.room.repository.RoomRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-
-import com.example.demo.room.dto.RoomCreateJoinRequestDto;
-import com.example.demo.room.model.Room;
-import com.example.demo.room.repository.RoomRepository;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoomService {
+
     private final RoomRepository roomRepository;
-    private final RedisTemplate<String, String> redisPublishTemplate;
-    private final String SALT_KEY_PREFIX = "salt:";
-    private final String ROOM_KEY_PREFIX = "room:";
 
-    public String createRoom(RoomCreateJoinRequestDto roomCreateDto) {
-        String salt = generateSalt();
-        String saltKey = SALT_KEY_PREFIX + roomCreateDto.getUserName();
-        redisPublishTemplate.opsForValue().set(saltKey, salt, 1, TimeUnit.DAYS);
-        String roomId = generateHash(roomCreateDto.getUserName() + roomCreateDto.getEnterCode() + salt);
+    @Value("${room.hashcode}")
+    private String roomHashCode;
 
-        // Redis 메세지 발행
-        publish(ROOM_KEY_PREFIX + roomId, "Host " + roomCreateDto.getUserName() + " created room " + roomId);
-        Room room = new Room();
-        room.setRoomId(roomId);
-        room.setEnterCode(roomCreateDto.getEnterCode());
-        room.setUserNameList(new ArrayList<String>());
-        room.getUserNameList().add(roomCreateDto.getUserName());
+    public String createRoom(RoomCreateRequestDto roomCreateDto, String hostEmail) {
+        String roomId = generateRoomId(roomCreateDto.getEnterCode());
+
+        if (roomRepository.existsById(roomId)) {
+            throw new IllegalStateException("Room already exists");
+        }
+
+        Room room = Room.builder()
+                .roomId(roomId)
+                .host(hostEmail)
+                .enterCode(roomCreateDto.getEnterCode())
+                .roomName(roomCreateDto.getRoomName())
+                .userNameList(new HashSet<>())
+                .date(roomCreateDto.getDate())
+                .time(roomCreateDto.getTime())
+                .description(roomCreateDto.getDescription())
+                .status(RoomStatus.ONGOING)
+                .build();
+
         roomRepository.save(room);
-
         return roomId;
     }
 
-    public String joinRoom(RoomCreateJoinRequestDto roomJoinDto) {
-        String saltKey = SALT_KEY_PREFIX + roomJoinDto.getUserName();
-        String salt = redisPublishTemplate.opsForValue().get(saltKey);
-        String roomId = generateHash(roomJoinDto.getUserName() + roomJoinDto.getEnterCode() + salt);
-        // Redis 메세지 발행
-        publish(ROOM_KEY_PREFIX + roomId, "User " + roomJoinDto.getUserName() + " joined room " + roomId);
+    public String joinRoom(RoomJoinRequestDto roomJoinRequestDto) {
+        String roomId = generateRoomId(roomJoinRequestDto.getEnterCode());
 
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null) {
-            return null;
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalStateException("Room not found"));
+
+        if (room.getStatus() == RoomStatus.COMPLETED) {
+            throw new IllegalStateException("Room is already completed");
         }
-        room.getUserNameList().add(roomJoinDto.getUserName());
-        roomRepository.save(room);
 
+        Set<String> users = Optional.ofNullable(room.getUserNameList())
+                .orElse(new HashSet<>());
+
+        users.add(roomJoinRequestDto.getUserName());
+        room.setUserNameList(users);
+
+        roomRepository.save(room);
         return roomId;
+    }
+
+    public void leaveRoom(String roomId, String userName) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalStateException("Room not found"));
+
+        Set<String> users = Optional.ofNullable(room.getUserNameList())
+                .orElse(new HashSet<>());
+
+        if (!users.contains(userName)) return;
+
+        if (userName.equals(room.getHost())) {
+            users.clear();
+            room.setStatus(RoomStatus.COMPLETED);
+        } else {
+            users.remove(userName);
+        }
+
+        room.setUserNameList(users);
+        roomRepository.save(room);
+    }
+
+    public List<Room> getMyRooms(String userName) {
+        return roomRepository.findAll().stream()
+                .filter(room -> room.getStatus() == RoomStatus.ONGOING)
+                .filter(room -> Optional.ofNullable(room.getUserNameList())
+                        .map(users -> users.contains(userName))
+                        .orElse(false))
+                .collect(Collectors.toList());
     }
 
     public String deleteRoom(String roomId) {
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null) {
+        if (!roomRepository.existsById(roomId)) {
             return null;
         }
         roomRepository.deleteById(roomId);
         return roomId;
     }
 
-    private void publish(String channel, String message) {
-        redisPublishTemplate.convertAndSend(channel, message);
+    private String generateRoomId(String enterCode) {
+        return generateHash(enterCode + roomHashCode);
     }
 
     private String generateHash(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
+                if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            return hexString.toString();
-        } 
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    private String generateSalt() {
-        return UUID.randomUUID().toString();
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating hash", e);
+        }
     }
 }

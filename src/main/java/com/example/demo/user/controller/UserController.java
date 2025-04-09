@@ -83,7 +83,7 @@ public class UserController {
         userGetProfileResponse.setUserType(user.getUserType());
         userGetProfileResponse.setCareer(user.getCareer());
         userGetProfileResponse.setSocialLink(user.getSocialLink());
-        userGetProfileResponse.setPortfolioImageList(user.getPortfolioImageList());
+        userGetProfileResponse.setPortfolioImageList(user.getDesignerDetails());
         userGetProfileResponse.setPortfolioDescription(user.getPortfolioDescription());
 
         return ResponseEntity.status(HttpStatus.OK).body(userGetProfileResponse);

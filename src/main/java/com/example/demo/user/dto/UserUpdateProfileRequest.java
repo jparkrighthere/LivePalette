@@ -10,6 +10,6 @@ public class UserUpdateProfileRequest {
     private Role userType;
     private String career;
     private String socialLink;
-    private String[] portfolioImageList;
+    private String[] designerDetails;
     private String portfolioDescription;
 }

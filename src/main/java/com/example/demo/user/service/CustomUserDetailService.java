@@ -92,11 +92,11 @@ public class CustomUserDetailService implements UserDetailsService,UserService {
             user.setSocialLink(null);
         }
 
-        if (updateUserRequest.getPortfolioImageList() != null) {
-            user.setPortfolioImageList(updateUserRequest.getPortfolioImageList());
+        if (updateUserRequest.getDesignerDetails() != null) {
+            user.setDesignerDetails(updateUserRequest.getDesignerDetails());
         }
-        else if (user.getPortfolioImageList() != null && updateUserRequest.getPortfolioImageList() == null) {
-            user.setPortfolioImageList(null);
+        else if (user.getDesignerDetails() != null && updateUserRequest.getDesignerDetails() == null) {
+            user.setDesignerDetails(null);
         }
 
         if (updateUserRequest.getPortfolioDescription() != null) {
