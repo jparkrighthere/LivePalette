@@ -6,6 +6,7 @@ import com.example.demo.auth.filter.JWTFilter;
 import com.example.demo.auth.filter.LoginFilter;
 import com.example.demo.auth.jwt.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +68,11 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(); // 비밀번호 암호화를 위해 BCrypt 사용
     }
     @Bean
-    public ObjectMapper objectMapper() {return new ObjectMapper();}
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
+    }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

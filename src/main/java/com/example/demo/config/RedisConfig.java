@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.auth.model.RefreshToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,9 @@ public class RedisConfig {
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
         //Value Serializer
-        Jackson2JsonRedisSerializer<RefreshToken> serializer = new Jackson2JsonRedisSerializer<>(new ObjectMapper(), RefreshToken.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        Jackson2JsonRedisSerializer<RefreshToken> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, RefreshToken.class);
         redisTemplate.setValueSerializer(serializer);
         return redisTemplate;
     }
@@ -41,7 +44,9 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
-        Jackson2JsonRedisSerializer<String> serializer = new Jackson2JsonRedisSerializer<>(new ObjectMapper(), String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        Jackson2JsonRedisSerializer<String> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, String.class);
         redisTemplate.setValueSerializer(serializer);
         return redisTemplate;
     }
