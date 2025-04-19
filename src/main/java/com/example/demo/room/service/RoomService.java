@@ -91,7 +91,6 @@ public class RoomService {
 
     public List<Room> getUserRooms(String userName) {
         return roomRepository.findAll().stream()
-                .filter(room -> room.getStatus() == RoomStatus.ONGOING)
                 .filter(room -> Optional.ofNullable(room.getUserNameList())
                         .map(users -> users.contains(userName))
                         .orElse(false))
