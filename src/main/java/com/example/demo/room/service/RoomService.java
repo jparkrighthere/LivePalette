@@ -89,7 +89,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
-    public List<Room> getMyRooms(String userName) {
+    public List<Room> getUserRooms(String userName) {
         return roomRepository.findAll().stream()
                 .filter(room -> room.getStatus() == RoomStatus.ONGOING)
                 .filter(room -> Optional.ofNullable(room.getUserNameList())
