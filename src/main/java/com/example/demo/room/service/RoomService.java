@@ -33,12 +33,15 @@ public class RoomService {
             throw new IllegalStateException("Room already exists");
         }
 
+        Set<String> userNameList = new HashSet<>();
+        userNameList.add(hostEmail);
+
         Room room = Room.builder()
                 .roomId(roomId)
                 .host(hostEmail)
                 .enterCode(roomCreateDto.getEnterCode())
                 .roomName(roomCreateDto.getRoomName())
-                .userNameList(new HashSet<>())
+                .userNameList(userNameList)
                 .date(roomCreateDto.getDate())
                 .time(roomCreateDto.getTime())
                 .description(roomCreateDto.getDescription())

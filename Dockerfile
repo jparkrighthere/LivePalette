@@ -8,6 +8,7 @@ WORKDIR /app
 COPY build/libs/demo-0.0.1-SNAPSHOT.jar /app.jar
 
 EXPOSE 8080
+EXPOSE 8081
 
 # Spring Boot 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=prod","-jar","app.jar"]

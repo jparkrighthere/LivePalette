@@ -1,6 +1,8 @@
 package com.example.demo.room.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/room")
 @RequiredArgsConstructor
@@ -56,8 +59,10 @@ public class RoomController {
     @GetMapping("/userRooms")
     public ResponseEntity<?> getUserRooms() {
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = customUserDetail.getNickName();
+        String username = customUserDetail.getUser().getUserName();
+        log.info("User's username: {}", username);
         List<Room> userRooms = roomService.getUserRooms(username);
+        log.info("User's rooms: {}", userRooms);
         return ResponseEntity.status(HttpStatus.OK).body(userRooms);
     }
 
