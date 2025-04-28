@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 7d17f87c0ce4f1755edc366ef26b93e0
+        update: a51352676db7045472d5c55a08ed9244
       labels:
         app: sk014-deploy-test
     spec:
