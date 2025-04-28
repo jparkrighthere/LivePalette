@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sk014-deploy-test
+  name: sk014-myapp-test
   namespace: skala-practice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sk014-deploy-test
+      app: sk014-myapp-test
   template:
     metadata:
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: a51352676db7045472d5c55a08ed9244
+        update: c2c3c146aa9bbf0e1eed499aba9a2e00
       labels:
-        app: sk014-deploy-test
+        app: sk014-myapp-test
     spec:
       serviceAccountName: default
       containers:
-      - name: deploy-test
-        image: amdp-registry.skala-ai.com/skala25a/sk014-deploy-test:1.0.0
+      - name: myapp-test
+        image: amdp-registry.skala-ai.com/skala25a/sk014-myapp-test:1.0.0
         imagePullPolicy: Always
         env:
         - name: LOGGING_LEVEL
