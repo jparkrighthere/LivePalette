@@ -4,12 +4,7 @@ FROM openjdk:17-jdk-slim
 # 작업 디렉토리 생성
 WORKDIR /app
 
-# 외부에서 받아들일 변수 선언
-ARG JAR_FILE
-
-# JAR 파일 복사
-COPY ${JAR_FILE} app.jar
-
+COPY build/libs/demo-0.0.1-SNAPSHOT.jar /app.jar
 # 필요한 포트 오픈
 EXPOSE 8080
 EXPOSE 8081
