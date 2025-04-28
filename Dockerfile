@@ -6,8 +6,7 @@ WORKDIR /app
 
 COPY build/libs/demo-0.0.1-SNAPSHOT.jar /app.jar
 # 필요한 포트 오픈
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 9999
 
 # 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
