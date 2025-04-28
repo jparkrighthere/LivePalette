@@ -10,4 +10,4 @@ EXPOSE 8080
 EXPOSE 8081
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
