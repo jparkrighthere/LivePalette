@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: bf9487f9fb718620d785e8c19047cbbe
+        update: 72c50b07429eb83df32013c5364db421
       labels:
         app: sk014-deploy-test
     spec:
@@ -24,7 +24,7 @@ spec:
         image: amdp-registry.skala-ai.com/skala25a/sk014-deploy-test:1.0.0
         imagePullPolicy: Always
         env:
-        - name: LOGGING_LEVEL
+        - name: LOGGING_LEVEL_ROOT
           value: DEBUG
         - name: USER_NAME
           value: sk014
