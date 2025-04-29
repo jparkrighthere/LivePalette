@@ -21,7 +21,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: deploy-test
-        image: amdp-registry.skala-ai.com/skala25a/sk014-deploy-test:1.0.0
+        image: amdp-registry.skala-ai.com/skala25a/sk014-deploy-test@sha256:ea78d43451ab2dc8c8dc4acb6a69893b4cbf20473b03e51c069f7b6e73486e8a
         imagePullPolicy: Always
         env:
         - name: LOGGING_LEVEL_ROOT
